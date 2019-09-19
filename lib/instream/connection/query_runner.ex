@@ -71,26 +71,33 @@ defmodule Instream.Connection.QueryRunner do
         :hackney.request(method, url, headers, body, http_opts(config, opts))
       end)
 
+    IO.inspect("Instream: #{query_time} #{url} ")
+
     case response do
       {:error, _} ->
         response
 
       {:ok, status, headers, client} ->
-        {:ok, body} = :hackney.body(client)
+        case :hackney.body(client) do
+          {:ok, body} ->
+            result = Response.maybe_parse({status, headers, body}, opts)
 
-        result = Response.maybe_parse({status, headers, body}, opts)
+            if false != opts[:log] do
+              conn.__log__(%QueryEntry{
+                query: query.payload,
+                metadata: %Metadata{
+                  query_time: query_time,
+                  response_status: status
+                }
+              })
+            end
 
-        if false != opts[:log] do
-          conn.__log__(%QueryEntry{
-            query: query.payload,
-            metadata: %Metadata{
-              query_time: query_time,
-              response_status: status
-            }
-          })
+            result
+
+          {:error, error} ->
+
+            {:error, error}
         end
-
-        result
     end
   end
 
