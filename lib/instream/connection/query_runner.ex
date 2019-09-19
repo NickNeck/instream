@@ -95,7 +95,11 @@ defmodule Instream.Connection.QueryRunner do
             result
 
           {:error, error} ->
-            IO.inspect("Instream ERROR: #{query_time} #{url} #{inspect(response)}")
+            IO.inspect(
+              "Instream ERROR: #{query_time} #{url} " <>
+                "Response: #{inspect(response)} " <> "Error: #{inspect(error)}"
+            )
+
             {:error, error}
         end
     end
