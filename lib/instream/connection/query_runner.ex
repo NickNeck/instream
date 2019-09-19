@@ -71,7 +71,7 @@ defmodule Instream.Connection.QueryRunner do
         :hackney.request(method, url, headers, body, http_opts(config, opts))
       end)
 
-    IO.inspect("Instream: #{query_time} #{url} ")
+    IO.inspect("Instream (read): #{query_time} #{url}")
 
     case response do
       {:error, _} ->
