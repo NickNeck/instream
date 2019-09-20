@@ -73,8 +73,6 @@ defmodule Instream.Connection.QueryRunner do
         :hackney.request(method, url, headers, body, [:with_body, http_opts])
       end)
 
-    IO.inspect(response, label: :resp)
-
     case response do
       {:error, _} ->
         response
