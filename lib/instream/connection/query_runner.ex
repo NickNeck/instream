@@ -66,20 +66,20 @@ defmodule Instream.Connection.QueryRunner do
     method = read_method(query, opts)
     url = read_url(config, query, opts)
 
+    http_opts= http_opts(config, opts)
+
     {query_time, response} =
       :timer.tc(fn ->
-        :hackney.request(method, url, headers, body, http_opts(config, opts))
+        :hackney.request(method, url, headers, body, [:with_body, http_opts])
       end)
 
-    IO.inspect("Instream (read): #{query_time} #{url}")
+    IO.inspect(response, label: :resp)
 
     case response do
       {:error, _} ->
         response
 
-      {:ok, status, headers, client} ->
-        case :hackney.body(client) do
-          {:ok, body} ->
+      {:ok, status, headers, body} ->
             result = Response.maybe_parse({status, headers, body}, opts)
 
             if false != opts[:log] do
@@ -93,15 +93,6 @@ defmodule Instream.Connection.QueryRunner do
             end
 
             result
-
-          {:error, error} ->
-            IO.inspect(
-              "Instream ERROR: #{query_time} #{url} " <>
-                "Response: #{inspect(response)} " <> "Error: #{inspect(error)}"
-            )
-
-            {:error, error}
-        end
     end
   end
 
